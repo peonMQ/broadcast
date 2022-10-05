@@ -1,113 +1,98 @@
 --- @type Mq
 local mq = require('mq')
+local broadCastInterfaceFactory = require('broadcastinterface')
 
---[[
-  Bright colors
-  [+y+] = yellow
-  [+o+] = orange
-  [+g+] = green
-  [+u+] = blue
-  [+r+] = red
-  [+t+] = teal
-  [+m+] = magenta
-  [+p+] = purple
-  [+w+] = white
-  [+x+] = reset 
+---@class BroadCastLevelDetail
+---@field level integer
+---@field color ColorName
+---@field abbreviation string
 
-  Dark colors
-  Same as above but with capitol letters
-]]
+---@alias BroadCastLevels 'info'|'success'|'fail'|'warn'|'error'
 
+---@type table<BroadCastLevels, BroadCastLevelDetail>
 local broadcastLevels = {
-  ['info']    = { level = 1, color = '[+u+]', abbreviation = '[INFO%s]'    },
-  ['success'] = { level = 2, color = '[+g+]', abbreviation = '[SUCCESS%s]' },
-  ['fail']    = { level = 3, color = '[+r+]', abbreviation = '[FAIL%s]'    },
-  ['warn']    = { level = 4, color = '[+y+]', abbreviation = '[WARN%s]'    },
-  ['error']   = { level = 5, color = '[+o+]', abbreviation = '[ERROR%s]'   },
+  ['info']    = { level = 1, color = 'Blue',   abbreviation = '[INFO%s]'    },
+  ['success'] = { level = 2, color = 'Green',  abbreviation = '[SUCCESS%s]' },
+  ['fail']    = { level = 3, color = 'Red',    abbreviation = '[FAIL%s]'    },
+  ['warn']    = { level = 4, color = 'Yellow', abbreviation = '[WARN%s]'    },
+  ['error']   = { level = 5, color = 'Orange', abbreviation = '[ERROR%s]'   },
 }
 
-local defaultConfig = {
+local config = {
+  delay = 50,
   usecolors = true,
   usetimestamp = false,
-  broadcastLevel = 'success',
+  broadcastLevel = 'info',
   separator = '::',
-  reciever = nil
+  reciever = 'morpheus'
 }
 
-local state = {
-  config = defaultConfig,
-}
+local broadCastInterface = broadCastInterfaceFactory()
+
+---@param bci BroadCastInterface
+---@param level BroadCastLevelDetail
+---@return string
+local function GetAbbreviation(bci, level)
+  local abbreviation
+  if config.usetimestamp then
+    abbreviation = string.format(level.abbreviation, config.separator..os.date("%X"))
+  else
+    abbreviation = string.format(level.abbreviation, "")
+  end
+
+  if config.usecolors then
+    return bci:ColorWrap(abbreviation, level.color)
+  end
+
+  return abbreviation
+end
+
+---@param paramLogLevel BroadCastLevels
+---@param message string
+---@param ... string
+local function Output(paramLogLevel, message, ...)
+  if not broadCastInterface then
+    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> connection.")
+    mq.delay(config.delay)
+    return
+  end
+
+  local broadcastLevel = broadcastLevels[paramLogLevel]
+  if broadcastLevels[config.broadcastLevel:lower()].level <= broadcastLevel.level then
+    local logMessage = string.format(message, ...)
+    mq.cmd(string.format('%s %s %s %s', broadCastInterface.GetBroadcastCommand(config.reciever), GetAbbreviation(broadCastInterface, broadcastLevel), config.separator, logMessage))
+    mq.delay(config.delay)
+  end
+end
 
 local BroadCast = {}
 
-local function GetColorStart(logLevel)
-  if state.config.usecolors then
-      return logLevel.color
-  end
-  return ''
-end
-
-local function GetColorEnd()
-    if state.config.usecolors then
-      return '[+x+]'
-    end
-    return ''
-end
-
-local function GetAbbreviation(logLevel)
-    if state.config.usetimestamp then
-      return string.format(logLevel.abbreviation, state.config.separator..os.date("%X"))
-    end
-    return string.format(logLevel.abbreviation, "")
-end
-
-local function recieverIsConnected(reciever)
-  local clients={}
-  for _, client in string.gmatch(mq.TLO.EQBC.Names(), "([^%s]+)") do
-    table.insert(clients, client)
-  end
-
-  for _, client in ipairs(clients) do
-   if client == reciever then
-    return true
-   end
-  end
-
-  return false
-end
-
-local function GetBroadcastCommand()
-    if state.config.reciever and recieverIsConnected(state.config.reciever) then
-      return string.format("/bct %s", state.config.reciever)
-    end
-    return '/bca'
-end
-
-local function Output(paramLogLevel, message, ...)
-  local broadcastLevel = broadcastLevels[paramLogLevel]
-  if broadcastLevels[state.config.broadcastLevel:lower()].level <= broadcastLevel.level then
-    local logMessage = string.format(message, ...)
-    mq.cmd(string.format('%s %s%s%s %s %s ', GetBroadcastCommand(), GetColorStart(broadcastLevel), GetAbbreviation(broadcastLevel), GetColorEnd(), state.config.separator, logMessage))
-    mq.delay(50)
-  end
-end
-
+---@param message string
+---@param ... string
 function BroadCast.Info(message, ...)
   Output('info', message, ...)
 end
 
+---@param message string
+---@param ... string
 function BroadCast.Success(message, ...)
   Output('success', message, ...)
 end
 
+---@param message string
+---@param ... string
 function BroadCast.Fail(message, ...)
   Output('fail', message, ...)
 end
 
+---@param message string
+---@param ... string
 function BroadCast.Warn(message, ...)
   Output('warn', message, ...)
 end
 
+---@param message string
+---@param ... string
 function BroadCast.Error(message, ...)
   Output('error', message, ...)
 end
