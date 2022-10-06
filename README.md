@@ -4,6 +4,18 @@ Library to help broadcast important information to all EQBC connected toons, or 
 
 Heavily inspired by Knightly's 'Write' lua script'
 
+## Requirements
+
+- MQ
+- MQ2Lua
+- Either or both of:
+  - MQ2DanNet (to use DanNet peers/observers)
+  - MQ2EQBC+MQ2NetBots (to use netbots data)
+
+## Installation
+Add `broadcast.lua` and `broadcastinterface.lua` folder to the `lua` folder of your MQ directory.
+
+## Usage
 
 ```lua
 local broadcast = require('broadcast')
