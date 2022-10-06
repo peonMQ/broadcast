@@ -9,8 +9,8 @@ Heavily inspired by Knightly's 'Write' lua script'
 - MQ
 - MQ2Lua
 - Either or both of:
-  - MQ2DanNet (to use DanNet peers/observers)
-  - MQ2EQBC+MQ2NetBots (to use netbots data)
+  - MQ2DanNet (Preferred communication method if both are loaded)
+  - MQ2EQBC
 
 ## Installation
 Add `broadcast.lua` and `broadcastinterface.lua` folder to the `lua` folder of your MQ directory.
