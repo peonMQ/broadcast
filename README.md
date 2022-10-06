@@ -13,7 +13,7 @@ Heavily inspired by Knightly's 'Write' lua script'
   - MQ2EQBC
 
 ## Installation
-Add `broadcast.lua` and `broadcastinterface.lua` folder to the `lua` folder of your MQ directory.
+Add `broadcast.lua` and `broadcastinterface.lua` to the `lua` folder of your MQ directory.
 
 ## Usage
 
