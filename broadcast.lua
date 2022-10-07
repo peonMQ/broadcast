@@ -1,6 +1,7 @@
 --- @type Mq
 local mq = require('mq')
 local broadCastInterfaceFactory = require('broadcastinterface')
+local configLoader = require('utils/configloader')
 
 ---@class BroadCastLevelDetail
 ---@field level integer
@@ -18,15 +19,17 @@ local broadcastLevels = {
   ['error']   = { level = 5, color = 'Orange', abbreviation = '[ERROR%s]'   },
 }
 
-local config = {
+local defaultConfig = {
   delay = 50,
   usecolors = true,
   usetimestamp = false,
   broadcastLevel = 'info',
   separator = '::',
-  reciever = 'morpheus'
+  reciever = ''
 }
 
+
+local config = configLoader.LoadConfig("logging", defaultConfig)
 local broadCastInterface = broadCastInterfaceFactory()
 
 ---@param bci BroadCastInterface
