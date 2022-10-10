@@ -1,6 +1,6 @@
 --- @type Mq
 local mq = require('mq')
-local broadCastInterfaceFactory = require('broadcastinterface')
+local broadCastInterfaceFactory = require('broadcast/broadcastinterface')
 local configLoader = require('utils/configloader')
 
 ---@class BroadCastLevelDetail
