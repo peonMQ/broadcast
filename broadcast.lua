@@ -29,7 +29,7 @@ local defaultConfig = {
 }
 
 
-local config = configLoader.LoadConfig("logging", defaultConfig)
+local config = configLoader("logging", defaultConfig)
 local broadCastInterface = broadCastInterfaceFactory()
 
 ---@param bci BroadCastInterface
