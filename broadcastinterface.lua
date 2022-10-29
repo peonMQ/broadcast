@@ -62,7 +62,7 @@ local eqbcBroadCaster = {
   GetBroadcastCommand = function(reciever)
     if reciever then
       local clients={}
-      for _, client in string.gmatch(mq.TLO.EQBC.Names(), "([^%s]+)") do
+      for client in string.gmatch(mq.TLO.EQBC.Names(), "([^%s]+)") do
         table.insert(clients, client:lower())
       end
 
