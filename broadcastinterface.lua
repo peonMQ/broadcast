@@ -1,5 +1,6 @@
 --- @type Mq
 local mq = require('mq')
+local luahelper = require('utils/lua-table')
 
 ---@alias ColorName 'Previous'|'Black'|'Blue'|'Cyan'|'Green'|'Maroon'|'Orange'|'Red'|'White'|'Yellow'
 
@@ -7,6 +8,19 @@ local mq = require('mq')
 ---@field GetBroadcastCommand fun(reciever?: string): string
 ---@field ColorWrap fun(self: BroadCastInterface, text: string, color: ColorName): string
 ---@field ColorCodes table<ColorName, string>
+
+---@param table table
+---@param value string
+---@return boolean
+local function containsValue(table, value)
+  for _, tableValue in pairs(table) do
+    if tableValue:lower() == value:lower() then
+      return true
+    end
+  end
+
+  return false
+end
 
 ---@type BroadCastInterface
 local dannetBroadCaster = {
@@ -24,15 +38,16 @@ local dannetBroadCaster = {
     Yellow = '\ay',
   },
   GetBroadcastCommand = function(reciever)
-    if reciever then
+    local recieverTable = luahelper.Split(reciever, ",")
+    if next(recieverTable) then
       local clients={}
       for client in string.gmatch(mq.TLO.DanNet.Peers(), "([^|]+)") do
         table.insert(clients, client:lower())
       end
 
       for i, client in ipairs(clients) do
-        if client:gsub('^([a-zA-Z0-9]+_)', '') == reciever:lower() then
-          return string.format("/dt %s", reciever)
+        if containsValue(recieverTable, client:gsub('^([a-zA-Z0-9]+_)', '')) then
+          return string.format("/dt %s", client)
         end
       end
     end
@@ -60,15 +75,16 @@ local eqbcBroadCaster = {
     Yellow = '[+y+]',
   },
   GetBroadcastCommand = function(reciever)
-    if reciever then
+    local recieverTable = luahelper.Split(reciever, ",")
+    if next(recieverTable) then
       local clients={}
       for client in string.gmatch(mq.TLO.EQBC.Names(), "([^%s]+)") do
         table.insert(clients, client:lower())
       end
 
       for i, client in ipairs(clients) do
-        if client == reciever:lower() then
-          return string.format("/bct %s", reciever)
+        if containsValue(recieverTable, client) then
+          return string.format("/bct %s", client)
         end
       end
     end
