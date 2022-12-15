@@ -2,6 +2,7 @@
 local mq = require('mq')
 local broadCastInterfaceFactory = require('broadcast/broadcastinterface')
 local configLoader = require('utils/configloader')
+local luahelper = require('utils/lua-table')
 
 ---@class BroadCastLevelDetail
 ---@field level integer
@@ -27,7 +28,6 @@ local defaultConfig = {
   separator = '::',
   reciever = ''
 }
-
 
 local config = configLoader("logging", defaultConfig)
 local broadCastInterface = broadCastInterfaceFactory()
@@ -62,8 +62,9 @@ local function Output(paramLogLevel, message, ...)
 
   local broadcastLevel = broadcastLevels[paramLogLevel]
   if broadcastLevels[config.broadcastLevel:lower()].level <= broadcastLevel.level then
+    local recievers = luahelper.Split(config.reciever, ",")
     local logMessage = string.format(message, ...)
-    mq.cmd(string.format('%s %s %s %s', broadCastInterface.GetBroadcastCommand(config.reciever), GetAbbreviation(broadCastInterface, broadcastLevel), config.separator, logMessage))
+    broadCastInterface.Broadcast(string.format('%s %s %s', GetAbbreviation(broadCastInterface, broadcastLevel), config.separator, logMessage), recievers)
     mq.delay(config.delay)
   end
 end

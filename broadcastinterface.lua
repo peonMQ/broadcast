@@ -1,11 +1,11 @@
 --- @type Mq
 local mq = require('mq')
-local luahelper = require('utils/lua-table')
 
 ---@alias ColorName 'Previous'|'Black'|'Blue'|'Cyan'|'Green'|'Maroon'|'Orange'|'Red'|'White'|'Yellow'
 
 ---@class BroadCastInterface
----@field GetBroadcastCommand fun(reciever?: string): string
+---@field Broadcast fun(message: string, recievers?: string[])
+---@field ExecuteCommand fun(executeCommand: string, recievers?: string[])
 ---@field ColorWrap fun(self: BroadCastInterface, text: string, color: ColorName): string
 ---@field ColorCodes table<ColorName, string>
 
@@ -37,22 +37,37 @@ local dannetBroadCaster = {
     White = '\aw',
     Yellow = '\ay',
   },
-  GetBroadcastCommand = function(reciever)
-    local recieverTable = luahelper.Split(reciever, ",")
-    if next(recieverTable) then
+  Broadcast = function(message, recievers)
+    if recievers and next(recievers) then
       local clients={}
       for client in string.gmatch(mq.TLO.DanNet.Peers(), "([^|]+)") do
         table.insert(clients, client:lower())
       end
 
       for i, client in ipairs(clients) do
-        if containsValue(recieverTable, client:gsub('^([a-zA-Z0-9]+_)', '')) then
-          return string.format("/dt %s", client)
+        if containsValue(recievers, client:gsub('^([a-zA-Z0-9]+_)', '')) then
+          mq.cmdf("/dt %s %s", client, message)
         end
       end
     end
 
-    return '/dgt all'
+    mq.cmdf('/dgae all %s', message)
+  end,
+  ExecuteCommand = function(executeCommand, recievers)
+    if recievers and next(recievers) then
+      local clients={}
+      for client in string.gmatch(mq.TLO.DanNet.Peers(), "([^|]+)") do
+        table.insert(clients, client:lower())
+      end
+
+      for i, client in ipairs(clients) do
+        if containsValue(recievers, client:gsub('^([a-zA-Z0-9]+_)', '')) then
+          mq.cmdf("/dex %s %s", client, executeCommand)
+        end
+      end
+    end
+
+    mq.cmdf('/dgae %s', executeCommand)
   end,
   ColorWrap = function (self, text, color)
     return string.format('%s%s%s', self.ColorCodes[color], text, self.ColorCodes.Previous)
@@ -74,22 +89,37 @@ local eqbcBroadCaster = {
     White = '[+w+]',
     Yellow = '[+y+]',
   },
-  GetBroadcastCommand = function(reciever)
-    local recieverTable = luahelper.Split(reciever, ",")
-    if next(recieverTable) then
+  Broadcast = function(message, recievers)
+    if recievers and next(recievers) then
       local clients={}
       for client in string.gmatch(mq.TLO.EQBC.Names(), "([^%s]+)") do
         table.insert(clients, client:lower())
       end
 
       for i, client in ipairs(clients) do
-        if containsValue(recieverTable, client) then
-          return string.format("/bct %s", client)
+        if containsValue(recievers, client) then
+          mq.cmdf("/bct %s %s", client, message)
         end
       end
     end
 
-    return '/bca'
+    mq.cmdf('/bcaa %s', message)
+  end,
+  ExecuteCommand = function(executeCommand, recievers)
+    if recievers and next(recievers) then
+      local clients={}
+      for client in string.gmatch(mq.TLO.EQBC.Names(), "([^%s]+)") do
+        table.insert(clients, client:lower())
+      end
+
+      for i, client in ipairs(clients) do
+        if containsValue(recievers, client) then
+          mq.cmdf("/bct %s /%s", client, executeCommand)
+        end
+      end
+    end
+
+    mq.cmdf('/bcaa /%s', executeCommand)
   end,
   ColorWrap = function (self, text, color)
     return string.format('%s%s%s', self.ColorCodes[color], text, self.ColorCodes.Previous)
