@@ -1,5 +1,6 @@
 --- @type Mq
 local mq = require('mq')
+local debugutil = require('utils/debug')
 
 ---@alias ColorName 'Previous'|'Black'|'Blue'|'Cyan'|'Green'|'Maroon'|'Orange'|'Red'|'White'|'Yellow'
 
@@ -49,9 +50,9 @@ local dannetBroadCaster = {
           mq.cmdf("/dt %s %s", client, message)
         end
       end
+    else
+      mq.cmdf('/dgt all %s', message)
     end
-
-    mq.cmdf('/dgae all %s', message)
   end,
   ExecuteCommand = function(executeCommand, recievers)
     if recievers and next(recievers) then
@@ -65,9 +66,9 @@ local dannetBroadCaster = {
           mq.cmdf("/dex %s %s", client, executeCommand)
         end
       end
+    else
+      mq.cmdf('/dgae %s', executeCommand)
     end
-
-    mq.cmdf('/dgae %s', executeCommand)
   end,
   ColorWrap = function (self, text, color)
     return string.format('%s%s%s', self.ColorCodes[color], text, self.ColorCodes.Previous)
@@ -101,9 +102,9 @@ local eqbcBroadCaster = {
           mq.cmdf("/bct %s %s", client, message)
         end
       end
+    else
+      mq.cmdf('/bcaa %s', message)
     end
-
-    mq.cmdf('/bcaa %s', message)
   end,
   ExecuteCommand = function(executeCommand, recievers)
     if recievers and next(recievers) then
@@ -117,9 +118,9 @@ local eqbcBroadCaster = {
           mq.cmdf("/bct %s /%s", client, executeCommand)
         end
       end
+    else
+      mq.cmdf('/bcaa /%s', executeCommand)
     end
-
-    mq.cmdf('/bcaa /%s', executeCommand)
   end,
   ColorWrap = function (self, text, color)
     return string.format('%s%s%s', self.ColorCodes[color], text, self.ColorCodes.Previous)
