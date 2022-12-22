@@ -6,7 +6,8 @@ local debugutil = require('utils/debug')
 
 ---@class BroadCastInterface
 ---@field Broadcast fun(message: string, recievers?: string[])
----@field ExecuteCommand fun(executeCommand: string, recievers?: string[])
+---@field ExecuteCommand fun(executeCommand: string, recievers: string[])
+---@field ExecuteAllCommand fun(executeCommand: string, includeSelf?: boolean)
 ---@field ColorWrap fun(self: BroadCastInterface, text: string, color: ColorName): string
 ---@field ColorCodes table<ColorName, string>
 
@@ -51,11 +52,11 @@ local dannetBroadCaster = {
         end
       end
     else
-      mq.cmdf('/dgt all %s', message)
+      mq.cmdf('/dgt %s', message)
     end
   end,
   ExecuteCommand = function(executeCommand, recievers)
-    if recievers and next(recievers) then
+    if next(recievers) then
       local clients={}
       for client in string.gmatch(mq.TLO.DanNet.Peers(), "([^|]+)") do
         table.insert(clients, client:lower())
@@ -66,8 +67,13 @@ local dannetBroadCaster = {
           mq.cmdf("/dex %s %s", client, executeCommand)
         end
       end
-    else
+    end
+  end,
+  ExecuteAllCommand = function(executeCommand, includeSelf)
+    if includeSelf then
       mq.cmdf('/dgae %s', executeCommand)
+    else
+      mq.cmdf('/dge %s', executeCommand)
     end
   end,
   ColorWrap = function (self, text, color)
@@ -103,11 +109,11 @@ local eqbcBroadCaster = {
         end
       end
     else
-      mq.cmdf('/bcaa %s', message)
+      mq.cmdf('/bca %s', message)
     end
   end,
   ExecuteCommand = function(executeCommand, recievers)
-    if recievers and next(recievers) then
+    if next(recievers) then
       local clients={}
       for client in string.gmatch(mq.TLO.EQBC.Names(), "([^%s]+)") do
         table.insert(clients, client:lower())
@@ -118,8 +124,13 @@ local eqbcBroadCaster = {
           mq.cmdf("/bct %s /%s", client, executeCommand)
         end
       end
-    else
+    end
+  end,
+  ExecuteAllCommand = function(executeCommand, includeSelf)
+    if includeSelf then
       mq.cmdf('/bcaa /%s', executeCommand)
+    else
+      mq.cmdf('/bca /%s', executeCommand)
     end
   end,
   ColorWrap = function (self, text, color)
