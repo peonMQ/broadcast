@@ -64,16 +64,16 @@ local dannetBroadCaster = {
 
       for i, client in ipairs(clients) do
         if containsValue(recievers, client:gsub('^([a-zA-Z0-9]+_)', '')) then
-          mq.cmdf("/dex %s %s", client, executeCommand)
+          mq.cmdf("/noparse /dex %s %s", client, executeCommand)
         end
       end
     end
   end,
   ExecuteAllCommand = function(executeCommand, includeSelf)
     if includeSelf then
-      mq.cmdf('/dgae %s', executeCommand)
+      mq.cmdf('/noparse /dgae %s', executeCommand)
     else
-      mq.cmdf('/dge %s', executeCommand)
+      mq.cmdf('/noparse /dge %s', executeCommand)
     end
   end,
   ColorWrap = function (self, text, color)
@@ -121,16 +121,16 @@ local eqbcBroadCaster = {
 
       for i, client in ipairs(clients) do
         if containsValue(recievers, client) then
-          mq.cmdf("/bct %s /%s", client, executeCommand)
+          mq.cmdf("/noparse /bct %s /%s", client, executeCommand)
         end
       end
     end
   end,
   ExecuteAllCommand = function(executeCommand, includeSelf)
     if includeSelf then
-      mq.cmdf('/bcaa /%s', executeCommand)
+      mq.cmdf('/noparse /bcaa /%s', executeCommand)
     else
-      mq.cmdf('/bca /%s', executeCommand)
+      mq.cmdf('/noparse /bca /%s', executeCommand)
     end
   end,
   ColorWrap = function (self, text, color)
