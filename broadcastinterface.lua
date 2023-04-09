@@ -7,6 +7,7 @@ local debugutil = require('utils/debug')
 ---@field Broadcast fun(message: string, recievers?: string[])
 ---@field ExecuteCommand fun(executeCommand: string, recievers: string[])
 ---@field ExecuteAllCommand fun(executeCommand: string, includeSelf?: boolean)
+---@field ConnecteClients fun(): string[]
 ---@field ColorWrap fun(self: BroadCastInterface, text: string, color: ColorName): string
 ---@field ColorCodes table<ColorName, string>
 
@@ -75,6 +76,14 @@ local dannetBroadCaster = {
       mq.cmdf('/noparse /dge %s', executeCommand)
     end
   end,
+  ConnecteClients = function ()
+    local clients={}
+    for client in string.gmatch(mq.TLO.DanNet.Peers(), "([^|]+)") do
+      table.insert(clients, client:lower())
+    end
+
+    return clients
+  end,
   ColorWrap = function (self, text, color)
     return string.format('%s%s%s', self.ColorCodes[color], text, self.ColorCodes.Previous)
   end
@@ -131,6 +140,14 @@ local eqbcBroadCaster = {
     else
       mq.cmdf('/noparse /bca /%s', executeCommand)
     end
+  end,
+  ConnecteClients = function ()
+    local clients={}
+    for client in string.gmatch(mq.TLO.EQBC.Names(), "([^%s]+)") do
+      table.insert(clients, client:lower())
+    end
+
+    return clients
   end,
   ColorWrap = function (self, text, color)
     return string.format('%s%s%s', self.ColorCodes[color], text, self.ColorCodes.Previous)
