@@ -1,5 +1,5 @@
-local mq = require('mq')
-local debugutil = require('utils/debug')
+local mq = require 'mq'
+local debugutil = require 'utils/debug'
 
 ---@alias ColorName 'Previous'|'Black'|'Blue'|'Cyan'|'Green'|'Maroon'|'Orange'|'Red'|'White'|'Yellow'
 

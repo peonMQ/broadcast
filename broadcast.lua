@@ -1,7 +1,7 @@
-local mq = require('mq')
-local broadCastInterfaceFactory = require('broadcast/broadcastinterface')
-local configLoader = require('utils/configloader')
-local luahelper = require('utils/lua-table')
+local mq = require 'mq'
+local broadCastInterfaceFactory = require 'broadcast/broadcastinterface'
+local configLoader = require 'utils/configloader'
+local luahelper = require 'utils/lua-table'
 
 ---@class BroadCastLevelDetail
 ---@field level integer

@@ -18,7 +18,7 @@ Add `broadcast.lua` and `broadcastinterface.lua` to the `lua` folder of your MQ 
 ## Usage
 
 ```lua
-local broadcast = require('broadcast')
+local broadcast = require 'broadcast'
 
 broadcast.Info("Information for all")
 broadcast.Success("We succeded")
