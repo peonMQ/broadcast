@@ -1,7 +1,22 @@
 local mq = require 'mq'
 local broadCastInterfaceFactory = require 'broadcast/broadcastinterface'
-local configLoader = require 'utils/configloader'
-local luahelper = require 'utils/lua-table'
+-- This module provides a set of logging utilities with support for different log levels and colored output.
+local BroadCast = { _version = '2.0', _author = 'Knightly' }
+
+---@param inputstr string
+---@param separator string
+---@return table
+local function split (inputstr, separator)
+  if separator == nil then
+     separator = "%s"
+  end
+
+  local subStrings={}
+  for subString in string.gmatch(inputstr, "([^"..separator.."]+)") do
+     table.insert(subStrings, subString)
+  end
+  return subStrings
+end
 
 ---@class BroadCastLevelDetail
 ---@field level integer
@@ -19,16 +34,13 @@ local broadcastLevels = {
   ['error']   = { level = 5, color = 'Orange', abbreviation = '[ERROR%s]'   },
 }
 
-local defaultConfig = {
-  delay = 50,
-  usecolors = true,
-  usetimestamp = false,
-  broadcastLevel = 'info',
-  separator = '::',
-  reciever = ''
-}
+BroadCast.usecolors = true
+BroadCast.usetimestamp = false
+BroadCast.broadcastLevel = 'info'
+BroadCast.prefix = ''
+BroadCast.separator = '::'
+BroadCast.reciever = ''
 
-local config = configLoader("logging", defaultConfig)
 local broadCastInterface = broadCastInterfaceFactory()
 
 ---@param bci BroadCastInterface
@@ -36,13 +48,13 @@ local broadCastInterface = broadCastInterfaceFactory()
 ---@return string
 local function GetAbbreviation(bci, level)
   local abbreviation
-  if config.usetimestamp then
-    abbreviation = string.format(level.abbreviation, config.separator..os.date("%X"))
+  if BroadCast.usetimestamp then
+    abbreviation = string.format(level.abbreviation, BroadCast.separator..os.date("%X"))
   else
     abbreviation = string.format(level.abbreviation, "")
   end
 
-  if config.usecolors then
+  if BroadCast.usecolors then
     return bci:ColorWrap(abbreviation, level.color)
   end
 
@@ -55,20 +67,17 @@ end
 local function Output(paramLogLevel, message, ...)
   if not broadCastInterface then
     print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> connection.")
-    mq.delay(config.delay)
     return
   end
 
   local broadcastLevel = broadcastLevels[paramLogLevel]
-  if broadcastLevels[config.broadcastLevel:lower()].level <= broadcastLevel.level then
-    local recievers = luahelper.Split(config.reciever, ",")
+  if broadcastLevels[BroadCast.broadcastLevel:lower()].level <= broadcastLevel.level then
+    local recievers = split(BroadCast.reciever, ",")
     local logMessage = string.format(message, ...)
-    broadCastInterface.Broadcast(string.format('%s %s %s', GetAbbreviation(broadCastInterface, broadcastLevel), config.separator, logMessage), recievers)
-    mq.delay(config.delay)
+    broadCastInterface.Broadcast(string.format('%s%s %s %s', BroadCast.prefix, GetAbbreviation(broadCastInterface, broadcastLevel), BroadCast.separator, logMessage), recievers)
+    mq.delay(BroadCast.delay)
   end
 end
-
-local BroadCast = {}
 
 ---@param message string
 ---@param ... string

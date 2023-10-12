@@ -1,5 +1,4 @@
 local mq = require 'mq'
-local debugutil = require 'utils/debug'
 
 ---@alias ColorName 'Previous'|'Black'|'Blue'|'Cyan'|'Green'|'Maroon'|'Orange'|'Red'|'White'|'Yellow'
 
@@ -7,6 +6,7 @@ local debugutil = require 'utils/debug'
 ---@field Broadcast fun(message: string, recievers?: string[])
 ---@field ExecuteCommand fun(executeCommand: string, recievers: string[])
 ---@field ExecuteAllCommand fun(executeCommand: string, includeSelf?: boolean)
+---@field ExecuteZoneCommand fun(executeCommand: string, includeSelf?: boolean)
 ---@field ConnecteClients fun(): string[]
 ---@field ColorWrap fun(self: BroadCastInterface, text: string, color: ColorName): string
 ---@field ColorCodes table<ColorName, string>
@@ -76,6 +76,13 @@ local dannetBroadCaster = {
       mq.cmdf('/noparse /dge %s', executeCommand)
     end
   end,
+  ExecuteZoneCommand = function(executeCommand, includeSelf)
+    if includeSelf then
+      mq.cmdf('/noparse /dgzae %s', executeCommand)
+    else
+      mq.cmdf('/noparse /dgze %s', executeCommand)
+    end
+  end,
   ConnecteClients = function ()
     local clients={}
     for client in string.gmatch(mq.TLO.DanNet.Peers(), "([^|]+)") do
@@ -88,6 +95,8 @@ local dannetBroadCaster = {
     return string.format('%s%s%s', self.ColorCodes[color], text, self.ColorCodes.Previous)
   end
 }
+
+local netbotsLoaded = mq.TLO.Plugin("mq2netbots").IsLoaded()
 
 ---@type BroadCastInterface
 local eqbcBroadCaster = {
@@ -139,6 +148,17 @@ local eqbcBroadCaster = {
       mq.cmdf('/noparse /bcaa /%s', executeCommand)
     else
       mq.cmdf('/noparse /bca /%s', executeCommand)
+    end
+  end,
+  ExecuteZoneCommand = function(executeCommand, includeSelf)
+    if netbotsLoaded then
+      if includeSelf then
+        mq.cmdf('/noparse /bcza /%s', executeCommand)
+      else
+        mq.cmdf('/noparse /bcz /%s', executeCommand)
+      end
+    else
+      print("\ao[ERROR]\ax ExecuteZoneCommand for EQBC requires netbots to be loaded.")
     end
   end,
   ConnecteClients = function ()
