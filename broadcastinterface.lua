@@ -1,5 +1,4 @@
 local mq = require 'mq'
-local debugutil = require 'utils/debug'
 
 ---@alias ColorName 'Previous'|'Black'|'Blue'|'Cyan'|'Green'|'Maroon'|'Orange'|'Red'|'White'|'Yellow'
 
@@ -7,7 +6,8 @@ local debugutil = require 'utils/debug'
 ---@field Broadcast fun(message: string, recievers?: string[])
 ---@field ExecuteCommand fun(executeCommand: string, recievers: string[])
 ---@field ExecuteAllCommand fun(executeCommand: string, includeSelf?: boolean)
----@field ConnecteClients fun(): string[]
+---@field ExecuteZoneCommand fun(executeCommand: string, includeSelf?: boolean)
+---@field ConnectedClients fun(): string[]
 ---@field ColorWrap fun(self: BroadCastInterface, text: string, color: ColorName): string
 ---@field ColorCodes table<ColorName, string>
 
@@ -43,12 +43,15 @@ local dannetBroadCaster = {
     if recievers and next(recievers) then
       local clients={}
       for client in string.gmatch(mq.TLO.DanNet.Peers(), "([^|]+)") do
-        table.insert(clients, client:lower())
+        local name, _ = client:lower():gsub('^([a-zA-Z0-9]+_)', '')
+        table.insert(clients, name)
       end
 
-      for i, client in ipairs(clients) do
-        if containsValue(recievers, client:gsub('^([a-zA-Z0-9]+_)', '')) then
-          mq.cmdf("/dt %s %s", client, message)
+      for _, reciever in ipairs(recievers) do
+        if containsValue(clients, reciever) then
+          mq.cmdf("/dt %s %s", reciever, message)
+        else
+          mq.cmdf("/dgt %s %s", reciever, message)
         end
       end
     else
@@ -76,7 +79,14 @@ local dannetBroadCaster = {
       mq.cmdf('/noparse /dge %s', executeCommand)
     end
   end,
-  ConnecteClients = function ()
+  ExecuteZoneCommand = function(executeCommand, includeSelf)
+    if includeSelf then
+      mq.cmdf('/noparse /dgzae %s', executeCommand)
+    else
+      mq.cmdf('/noparse /dgze %s', executeCommand)
+    end
+  end,
+  ConnectedClients = function ()
     local clients={}
     for client in string.gmatch(mq.TLO.DanNet.Peers(), "([^|]+)") do
       table.insert(clients, client:lower())
@@ -88,6 +98,8 @@ local dannetBroadCaster = {
     return string.format('%s%s%s', self.ColorCodes[color], text, self.ColorCodes.Previous)
   end
 }
+
+local netbotsLoaded = mq.TLO.Plugin("mq2netbots").IsLoaded()
 
 ---@type BroadCastInterface
 local eqbcBroadCaster = {
@@ -106,15 +118,8 @@ local eqbcBroadCaster = {
   },
   Broadcast = function(message, recievers)
     if recievers and next(recievers) then
-      local clients={}
-      for client in string.gmatch(mq.TLO.EQBC.Names(), "([^%s]+)") do
-        table.insert(clients, client:lower())
-      end
-
-      for i, client in ipairs(clients) do
-        if containsValue(recievers, client) then
-          mq.cmdf("/bct %s %s", client, message)
-        end
+      for _, client in ipairs(recievers) do
+        mq.cmdf("/bct %s %s", client, message)
       end
     else
       mq.cmdf('/bca %s', message)
@@ -141,7 +146,18 @@ local eqbcBroadCaster = {
       mq.cmdf('/noparse /bca /%s', executeCommand)
     end
   end,
-  ConnecteClients = function ()
+  ExecuteZoneCommand = function(executeCommand, includeSelf)
+    if netbotsLoaded then
+      if includeSelf then
+        mq.cmdf('/noparse /bcza /%s', executeCommand)
+      else
+        mq.cmdf('/noparse /bcz /%s', executeCommand)
+      end
+    else
+      print("\ao[ERROR]\ax ExecuteZoneCommand for EQBC requires netbots to be loaded.")
+    end
+  end,
+  ConnectedClients = function ()
     local clients={}
     for client in string.gmatch(mq.TLO.EQBC.Names(), "([^%s]+)") do
       table.insert(clients, client:lower())
@@ -154,14 +170,37 @@ local eqbcBroadCaster = {
   end
 }
 
----@return BroadCastInterface|nil
+---@type BroadCastInterface
+local noBroadcaster = {
+  ColorCodes= {},
+  Broadcast= function(message, recievers)
+    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> connection.")
+  end,
+  ExecuteCommand= function(executeCommand, recievers)
+    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> connection.")
+  end,
+  ExecuteAllCommand= function(executeCommand, includeSelf) 
+    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> connection.")
+  end,
+  ExecuteZoneCommand= function(executeCommand, includeSelf)
+    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> connection.")
+  end,
+  ConnectedClients= function() 
+    return {}
+  end,
+  ColorWrap = function(self, text, color)
+    return text
+  end,
+}
+
+---@return BroadCastInterface
 local function factory()
   if mq.TLO.Plugin("mq2dannet").IsLoaded() then
     return dannetBroadCaster
   elseif mq.TLO.Plugin("mq2eqbc").IsLoaded() and mq.TLO.EQBC.Connected() then
     return eqbcBroadCaster
   else
-    return nil
+    return noBroadcaster
   end
 end
 
