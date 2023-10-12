@@ -3,21 +3,6 @@ local broadCastInterfaceFactory = require 'broadcast/broadcastinterface'
 -- This module provides a set of logging utilities with support for different log levels and colored output.
 local BroadCast = { _version = '2.0', _author = 'projecteon' }
 
----@param inputstr string
----@param separator string
----@return table
-local function split (inputstr, separator)
-  if separator == nil then
-     separator = "%s"
-  end
-
-  local subStrings={}
-  for subString in string.gmatch(inputstr, "([^"..separator.."]+)") do
-     table.insert(subStrings, subString)
-  end
-  return subStrings
-end
-
 ---@class BroadCastLevelDetail
 ---@field level integer
 ---@field color ColorName
