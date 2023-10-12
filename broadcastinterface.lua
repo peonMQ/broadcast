@@ -41,16 +41,18 @@ local dannetBroadCaster = {
   },
   Broadcast = function(message, recievers)
     if recievers and next(recievers) then
+      print(table.concat(recievers))
       local clients={}
       for client in string.gmatch(mq.TLO.DanNet.Peers(), "([^|]+)") do
-        table.insert(clients, client:lower())
+        local name, _ = client:lower():gsub('^([a-zA-Z0-9]+_)', '')
+        table.insert(clients, name)
       end
 
-      for i, client in ipairs(clients) do
-        if containsValue(recievers, client:gsub('^([a-zA-Z0-9]+_)', '')) then
-          mq.cmdf("/dt %s %s", client, message)
+      for _, reciever in ipairs(recievers) do
+        if containsValue(clients, reciever) then
+          mq.cmdf("/dt %s %s", reciever, message)
         else
-          mq.cmdf("/dgt %s %s", client, message)
+          mq.cmdf("/dgt %s %s", reciever, message)
         end
       end
     else
