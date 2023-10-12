@@ -41,7 +41,6 @@ local dannetBroadCaster = {
   },
   Broadcast = function(message, recievers)
     if recievers and next(recievers) then
-      print(table.concat(recievers))
       local clients={}
       for client in string.gmatch(mq.TLO.DanNet.Peers(), "([^|]+)") do
         local name, _ = client:lower():gsub('^([a-zA-Z0-9]+_)', '')
