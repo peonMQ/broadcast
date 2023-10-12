@@ -6,6 +6,7 @@ local mq = require 'mq'
 ---@field Broadcast fun(message: string, recievers?: string[])
 ---@field ExecuteCommand fun(executeCommand: string, recievers: string[])
 ---@field ExecuteAllCommand fun(executeCommand: string, includeSelf?: boolean)
+---@field ExecuteGroupCommand fun(executeCommand: string, includeSelf?: boolean)
 ---@field ExecuteZoneCommand fun(executeCommand: string, includeSelf?: boolean)
 ---@field ConnectedClients fun(): string[]
 ---@field ColorWrap fun(self: BroadCastInterface, text: string, color: ColorName): string
@@ -86,6 +87,13 @@ local dannetBroadCaster = {
       mq.cmdf('/noparse /dgze %s', executeCommand)
     end
   end,
+  ExecuteGroupCommand= function(executeCommand, includeSelf)
+    if includeSelf then
+      mq.cmdf('/noparse /dgge %s', executeCommand)
+    else
+      mq.cmdf('/noparse /dgga %s', executeCommand)
+    end
+  end,
   ConnectedClients = function ()
     local clients={}
     for client in string.gmatch(mq.TLO.DanNet.Peers(), "([^|]+)") do
@@ -157,6 +165,13 @@ local eqbcBroadCaster = {
       print("\ao[ERROR]\ax ExecuteZoneCommand for EQBC requires netbots to be loaded.")
     end
   end,
+  ExecuteGroupCommand= function(executeCommand, includeSelf)
+    if includeSelf then
+      mq.cmdf('/noparse /bcga /%s', executeCommand)
+    else
+      mq.cmdf('/noparse /bcg /%s', executeCommand)
+    end
+  end,
   ConnectedClients = function ()
     local clients={}
     for client in string.gmatch(mq.TLO.EQBC.Names(), "([^%s]+)") do
@@ -183,6 +198,9 @@ local noBroadcaster = {
     print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> connection.")
   end,
   ExecuteZoneCommand= function(executeCommand, includeSelf)
+    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> connection.")
+  end,
+  ExecuteGroupCommand= function(executeCommand, includeSelf)
     print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> connection.")
   end,
   ConnectedClients= function() 
