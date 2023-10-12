@@ -19,7 +19,6 @@ local broadcastLevels = {
   ['error']   = { level = 5, color = 'Orange', abbreviation = '[ERROR%s]'   },
 }
 
-BroadCast.usecolors = true
 BroadCast.usetimestamp = false
 BroadCast.broadcastLevel = 'info'
 BroadCast.prefix = ''
@@ -38,11 +37,7 @@ local function GetAbbreviation(bci, level)
     abbreviation = string.format(level.abbreviation, "")
   end
 
-  if BroadCast.usecolors then
-    return bci:ColorWrap(abbreviation, level.color)
-  end
-
-  return abbreviation
+  return bci:ColorWrap(abbreviation, level.color)
 end
 
 ---@param paramLogLevel BroadCastLevels
@@ -50,14 +45,9 @@ end
 ---@param message string
 ---@param ... string
 local function Output(paramLogLevel, recievers, message, ...)
-  if not broadCastInterface then
-    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> connection.")
-    return
-  end
-
   local broadcastLevel = broadcastLevels[paramLogLevel]
   if broadcastLevels[BroadCast.broadcastLevel:lower()].level <= broadcastLevel.level then
-    recievers = (type(recievers) == 'string') and {recievers} or recievers
+    recievers = (type(recievers) == 'string') and {recievers} or recievers    
     local logMessage = string.format(message, ...)
     broadCastInterface.Broadcast(string.format('%s%s %s %s', BroadCast.prefix, GetAbbreviation(broadCastInterface, broadcastLevel), BroadCast.separator, logMessage), recievers)
     mq.delay(BroadCast.delay)
