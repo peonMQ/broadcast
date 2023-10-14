@@ -5,9 +5,12 @@ local mq = require 'mq'
 ---@class BroadCastInterface
 ---@field Broadcast fun(message: string, recievers?: string[])
 ---@field ExecuteCommand fun(executeCommand: string, recievers: string[])
----@field ExecuteAllCommand fun(executeCommand: string, includeSelf?: boolean)
----@field ExecuteGroupCommand fun(executeCommand: string, includeSelf?: boolean)
----@field ExecuteZoneCommand fun(executeCommand: string, includeSelf?: boolean)
+---@field ExecuteAllCommand fun(executeCommand: string)
+---@field ExecuteAllWithSelfCommand fun(executeCommand: string)
+---@field ExecuteGroupCommand fun(executeCommand: string)
+---@field ExecuteGroupWithSelfCommand fun(executeCommand: string)
+---@field ExecuteZoneCommand fun(executeCommand: string)
+---@field ExecuteZoneWithSelfCommand fun(executeCommand: string)
 ---@field ConnectedClients fun(): string[]
 ---@field ColorWrap fun(self: BroadCastInterface, text: string, color: ColorName): string
 ---@field ColorCodes table<ColorName, string>
@@ -73,26 +76,23 @@ local dannetBroadCaster = {
       end
     end
   end,
-  ExecuteAllCommand = function(executeCommand, includeSelf)
-    if includeSelf then
-      mq.cmdf('/noparse /dgae %s', executeCommand)
-    else
-      mq.cmdf('/noparse /dge %s', executeCommand)
-    end
+  ExecuteAllCommand = function(executeCommand)
+    mq.cmdf('/noparse /dge %s', executeCommand)
   end,
-  ExecuteZoneCommand = function(executeCommand, includeSelf)
-    if includeSelf then
-      mq.cmdf('/noparse /dgzae %s', executeCommand)
-    else
-      mq.cmdf('/noparse /dgze %s', executeCommand)
-    end
+  ExecuteAllWithSelfCommand = function(executeCommand)
+    mq.cmdf('/noparse /dgae %s', executeCommand)
   end,
-  ExecuteGroupCommand= function(executeCommand, includeSelf)
-    if includeSelf then
-      mq.cmdf('/noparse /dgge %s', executeCommand)
-    else
-      mq.cmdf('/noparse /dgga %s', executeCommand)
-    end
+  ExecuteZoneCommand = function(executeCommand)
+    mq.cmdf('/noparse /dgze %s', executeCommand)
+  end,
+  ExecuteGroupWithSelfCommand = function(executeCommand)
+    mq.cmdf('/noparse /dgzae %s', executeCommand)
+  end,
+  ExecuteGroupCommand= function(executeCommand)
+    mq.cmdf('/noparse /dgga %s', executeCommand)
+  end,
+  ExecuteZoneWithSelfCommand= function(executeCommand)
+    mq.cmdf('/noparse /dgge %s', executeCommand)
   end,
   ConnectedClients = function ()
     local clients={}
@@ -147,30 +147,31 @@ local eqbcBroadCaster = {
       end
     end
   end,
-  ExecuteAllCommand = function(executeCommand, includeSelf)
-    if includeSelf then
-      mq.cmdf('/noparse /bcaa /%s', executeCommand)
-    else
-      mq.cmdf('/noparse /bca /%s', executeCommand)
-    end
+  ExecuteAllCommand = function(executeCommand)
+    mq.cmdf('/noparse /bca /%s', executeCommand)
   end,
-  ExecuteZoneCommand = function(executeCommand, includeSelf)
+  ExecuteAllWithSelfCommand = function(executeCommand)
+    mq.cmdf('/noparse /bcaa /%s', executeCommand)
+  end,
+  ExecuteZoneCommand = function(executeCommand)
     if netbotsLoaded then
-      if includeSelf then
-        mq.cmdf('/noparse /bcza /%s', executeCommand)
-      else
-        mq.cmdf('/noparse /bcz /%s', executeCommand)
-      end
+      mq.cmdf('/noparse /bcz /%s', executeCommand)
     else
       print("\ao[ERROR]\ax ExecuteZoneCommand for EQBC requires netbots to be loaded.")
     end
   end,
-  ExecuteGroupCommand= function(executeCommand, includeSelf)
-    if includeSelf then
-      mq.cmdf('/noparse /bcga /%s', executeCommand)
+  ExecuteZoneWithSelfCommand = function(executeCommand)
+    if netbotsLoaded then
+      mq.cmdf('/noparse /bcza /%s', executeCommand)
     else
-      mq.cmdf('/noparse /bcg /%s', executeCommand)
+      print("\ao[ERROR]\ax ExecuteZoneCommand for EQBC requires netbots to be loaded.")
     end
+  end,
+  ExecuteGroupCommand= function(executeCommand)
+    mq.cmdf('/noparse /bcg /%s', executeCommand)
+  end,
+  ExecuteGroupWithSelfCommand= function(executeCommand)
+    mq.cmdf('/noparse /bcga /%s', executeCommand)
   end,
   ConnectedClients = function ()
     local clients={}
@@ -194,13 +195,22 @@ local noBroadcaster = {
   ExecuteCommand= function(executeCommand, recievers)
     print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> connection.")
   end,
-  ExecuteAllCommand= function(executeCommand, includeSelf) 
+  ExecuteAllCommand= function(executeCommand) 
     print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> connection.")
   end,
-  ExecuteZoneCommand= function(executeCommand, includeSelf)
+  ExecuteAllWithSelfCommand= function(executeCommand) 
     print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> connection.")
   end,
-  ExecuteGroupCommand= function(executeCommand, includeSelf)
+  ExecuteZoneCommand= function(executeCommand)
+    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> connection.")
+  end,
+  ExecuteZoneWithSelfCommand= function(executeCommand)
+    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> connection.")
+  end,
+  ExecuteGroupCommand= function(executeCommand)
+    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> connection.")
+  end,
+  ExecuteGroupWithSelfCommand= function(executeCommand)
     print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> connection.")
   end,
   ConnectedClients= function() 

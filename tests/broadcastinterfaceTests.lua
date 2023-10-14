@@ -10,15 +10,15 @@ local function tests()
   command = string.format("/echo Hello %s not me!", bci:ColorWrap( "World", 'Green'))
   bci.ExecuteAllCommand(command)
   command = string.format("/echo Hello %s and me!", bci:ColorWrap( "World", 'Green'))
-  bci.ExecuteAllCommand(command, true)
+  bci.ExecuteAllWithSelfCommand(command)
   command = string.format("/echo Hello %s not me!", bci:ColorWrap( "Zone", 'Green'))
   bci.ExecuteZoneCommand(command)
   command = string.format("/echo Hello %s and me!", bci:ColorWrap( "Zone", 'Green'))
-  bci.ExecuteZoneCommand(command, true)
+  bci.ExecuteZoneWithSelfCommand(command)
   command = string.format("/echo Hello %s not me!", bci:ColorWrap( "Group", 'Green'))
   bci.ExecuteGroupCommand(command)
   command = string.format("/echo Hello %s and me!", bci:ColorWrap( "Group", 'Green'))
-  bci.ExecuteGroupCommand(command, true)
+  bci.ExecuteGroupWithSelfCommand(command)
 end
 
 return tests
