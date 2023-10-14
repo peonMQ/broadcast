@@ -215,7 +215,7 @@ local noBroadcaster = {
 local function factory()
   if mq.TLO.Plugin("mq2dannet").IsLoaded() then
     return dannetBroadCaster
-  elseif mq.TLO.Plugin("mq2eqbc").IsLoaded() and mq.TLO.EQBC.Connected() then
+  elseif mq.TLO.Plugin("mq2eqbc").IsLoaded() then
     return eqbcBroadCaster
   else
     return noBroadcaster
