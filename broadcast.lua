@@ -54,6 +54,13 @@ local function Output(paramLogLevel, recievers, message, ...)
   end
 end
 
+---@param text string
+---@param color ColorName
+---@return string
+function BroadCast.ColorWrap(text, color)
+  return broadCastInterface:ColorWrap(text, color)
+end
+
 ---@param recievers string|string[]
 ---@param message string
 ---@param ... string
