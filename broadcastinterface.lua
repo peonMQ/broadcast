@@ -130,7 +130,7 @@ local eqbcBroadCaster = {
         mq.cmdf("/bct %s %s", client, message)
       end
     else
-      mq.cmdf('/bca %s', message)
+      mq.cmdf('/bcaa %s', message)
     end
   end,
   ExecuteCommand = function(executeCommand, recievers)
