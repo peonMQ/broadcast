@@ -1,5 +1,7 @@
 local mq = require 'mq'
+local actors = require('actors')
 
+---@alias BroadCastMode 'EQBC'|'DANNET'|'ACTOR'|'AUTO'
 ---@alias ColorName 'Previous'|'Black'|'Blue'|'Cyan'|'Green'|'Maroon'|'Orange'|'Red'|'White'|'Yellow'
 
 ---@class BroadCastInterface
@@ -26,6 +28,11 @@ local function containsValue(table, value)
   end
 
   return false
+end
+
+local function log(_string)
+  local logstring = string.format("[%s] %s", os.date('%H:%M:%S'), _string)
+  print(logstring)
 end
 
 ---@type BroadCastInterface
@@ -186,34 +193,152 @@ local eqbcBroadCaster = {
   end
 }
 
+---@alias MessageType 'ExecuteCommand'|'Echo'|'Registrer'|'Announce'
+local connectedClients = {}
+---@param message Message
+local function handler(message)
+  if message.content.type == 'Announce' then
+    -- log("Announce "..message.sender.character)
+    connectedClients[message.sender.character] = mq.gettime()
+    message:send({ type= 'Registrer', from=mq.TLO.Me.Name() })
+  elseif message.content.type == 'Registrer' then
+    -- log("Registrer "..message.content.from)
+    connectedClients[message.content.from] = mq.gettime()
+  elseif message.content.type == 'Echo' then
+    if not message.content.zoneId or message.content.zoneId == mq.TLO.Zone.ID() then
+      print(message.content.content)
+    end
+  elseif message.content.type == 'ExecuteCommand' then
+      if not message.content.zoneId or message.content.zoneId == mq.TLO.Zone.ID() then
+        mq.cmd(message.content.command)
+      end
+  end
+end
+
+local function checkRemovePeer(peer)
+  return function(status, content) if status < 0 then connectedClients[peer] = nil end end
+end
+
+-- create an actor with a mailbox name -- the actor is addressed using script and mailbox
+local actor = actors.register('rpcbroadcast', handler)
+
+---@type BroadCastInterface
+local actorBroadcaster = {
+  ColorCodes = {
+    Previous = '\ax',
+    Black = '\ab',
+    Blue = '\au',
+    Cyan = '\at',
+    Green = '\ag',
+    Maroon = '\am',
+    Orange = '\ao',
+    Purple = '\ap',
+    Red = '\ar',
+    White = '\aw',
+    Yellow = '\ay',
+  },
+  Broadcast= function(message, recievers)
+    if recievers and next(recievers) then
+      for _, client in ipairs(recievers) do
+        if connectedClients[client] then
+          actor:send({ character=client }, { type= 'Echo', content = message }, checkRemovePeer(client))
+        end
+      end
+    else
+      for client, _ in pairs(connectedClients) do
+        actor:send({ character=client }, { type= 'Echo', content = message }, checkRemovePeer(client))
+      end
+    end
+  end,
+  ExecuteCommand= function(executeCommand, recievers)
+    if recievers and next(recievers) then
+      for _, client in ipairs(recievers) do
+        actor:send({ character=client }, { type= 'ExecuteCommand', command = executeCommand }, checkRemovePeer(client))
+      end
+    end
+  end,
+  ExecuteAllCommand= function(executeCommand)
+    for client, _ in pairs(connectedClients) do
+      if client ~= mq.TLO.Me.Name() then
+        actor:send({ character=client }, { type= 'ExecuteCommand', command = executeCommand }, checkRemovePeer(client))
+      end
+    end
+  end,
+  ExecuteAllWithSelfCommand= function(executeCommand)
+    -- mq.cmd(executeCommand)
+    actor:send({ type= 'ExecuteCommand', command = executeCommand })
+  end,
+  ExecuteZoneCommand= function(executeCommand)
+    for client, _ in pairs(connectedClients) do
+      if client ~= mq.TLO.Me.Name() then
+        actor:send({ character=client }, { type= 'ExecuteCommand', command = executeCommand, zoneId = mq.TLO.Zone.ID() }, checkRemovePeer(client))
+      end
+    end
+  end,
+  ExecuteZoneWithSelfCommand= function(executeCommand)
+    -- mq.cmd(executeCommand)
+    actor:send({ type= 'ExecuteCommand', command = executeCommand, zoneId = mq.TLO.Zone.ID() })
+  end,
+  ExecuteGroupCommand= function(executeCommand)
+    local group = mq.TLO.Group
+    for i=1,group.Members() do
+      if group.Member(i).ID() ~= mq.TLO.Me.ID() then
+        actor:send({ character=group.Member(i).Name() }, { type= 'ExecuteCommand', command = executeCommand })
+      end
+    end
+  end,
+  ExecuteGroupWithSelfCommand= function(executeCommand)
+    -- mq.cmd(executeCommand)
+      actor:send({ character=mq.TLO.Me.Name() }, { type= 'ExecuteCommand', command = executeCommand })
+    local group = mq.TLO.Group
+    for i=1,group.Members() do
+      actor:send({ character=group.Member(i).Name() }, { type= 'ExecuteCommand', command = executeCommand })
+    end
+  end,
+  ConnectedClients= function()
+    local clients={}
+    for client, _ in pairs(connectedClients) do
+      table.insert(clients, client:lower())
+    end
+
+    return clients
+  end,
+  ColorWrap = function (self, text, color)
+    return string.format('%s%s%s', self.ColorCodes[color], text, self.ColorCodes.Previous)
+  end
+}
+
+
+actor:send({ type= 'Announce' })
+
 ---@type BroadCastInterface
 local noBroadcaster = {
   ColorCodes= {},
   Broadcast= function(message, recievers)
-    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> connection.")
+    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> or <ACTOR> connection.")
   end,
   ExecuteCommand= function(executeCommand, recievers)
-    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> connection.")
+    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> or <ACTOR> connection.")
   end,
   ExecuteAllCommand= function(executeCommand) 
-    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> connection.")
+    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> or <ACTOR> connection.")
   end,
   ExecuteAllWithSelfCommand= function(executeCommand) 
-    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> connection.")
+    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> or <ACTOR> connection.")
   end,
   ExecuteZoneCommand= function(executeCommand)
-    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> connection.")
+    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> or <ACTOR> connection.")
   end,
   ExecuteZoneWithSelfCommand= function(executeCommand)
-    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> connection.")
+    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> or <ACTOR> connection.")
   end,
   ExecuteGroupCommand= function(executeCommand)
-    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> connection.")
+    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> or <ACTOR> connection.")
   end,
   ExecuteGroupWithSelfCommand= function(executeCommand)
-    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> connection.")
+    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> or <ACTOR> connection.")
   end,
-  ConnectedClients= function() 
+  ConnectedClients= function()
     return {}
   end,
   ColorWrap = function(self, text, color)
@@ -221,15 +346,18 @@ local noBroadcaster = {
   end,
 }
 
+---@param mode BroadCastMode
 ---@return BroadCastInterface
-local function factory()
-  if mq.TLO.Plugin("mq2dannet").IsLoaded() then
+local function factory(mode)
+  if (mode == 'DANNET' or mode == 'AUTO') and mq.TLO.Plugin("mq2dannet").IsLoaded() then
     return dannetBroadCaster
-  elseif mq.TLO.Plugin("mq2eqbc").IsLoaded() then
+  elseif (mode == 'EQBC' or mode == 'AUTO') and mq.TLO.Plugin("mq2eqbc").IsLoaded() then
     return eqbcBroadCaster
-  else
-    return noBroadcaster
+  elseif (mode == 'ACTOR' or mode == 'AUTO') then
+    return actorBroadcaster
   end
+
+  return noBroadcaster
 end
 
 return factory
