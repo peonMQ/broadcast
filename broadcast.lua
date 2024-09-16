@@ -21,7 +21,7 @@ BroadCast.broadcastLevel = 'info'
 BroadCast.prefix = ''
 BroadCast.separator = '::'
 
-local broadCastInterface = broadCastInterfaceFactory()
+local broadCastInterface = broadCastInterfaceFactory('AUTO')
 
 
 -- Handle add/remove for log levels
@@ -100,6 +100,13 @@ BroadCast.GenerateShortcuts()
 ---@return string
 function BroadCast.ColorWrap(text, color)
   return broadCastInterface:ColorWrap(text, color)
+end
+
+---@param mode BroadCastMode
+function BroadCast.SetMode(mode)
+  local logstring = string.format("[%s] %s", os.date('%H:%M:%S'), mode)
+  print(logstring)
+  broadCastInterface = broadCastInterfaceFactory(mode)
 end
 
 return BroadCast
