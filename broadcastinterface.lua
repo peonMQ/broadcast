@@ -17,6 +17,9 @@ local actors = require('actors')
 ---@field ColorWrap fun(self: BroadCastInterface, text: string, color: ColorName): string
 ---@field ColorCodes table<ColorName, string>
 
+---@type ConsoleWidget|nil
+local console = nil
+
 ---@param table table
 ---@param value string
 ---@return boolean
@@ -30,9 +33,17 @@ local function containsValue(table, value)
   return false
 end
 
-local function log(_string)
-  local logstring = string.format("[%s] %s", os.date('%H:%M:%S'), _string)
-  print(logstring)
+local function printText(text)
+  if console then
+    console:AppendText(text)
+  else
+    print(text)
+  end
+end
+
+local function log(text)
+  local logtext = string.format("[%s] %s", os.date('%H:%M:%S'), text)
+  printText(log)
 end
 
 ---@type BroadCastInterface
@@ -164,14 +175,14 @@ local eqbcBroadCaster = {
     if netbotsLoaded then
       mq.cmdf('/noparse /bcz /%s', executeCommand)
     else
-      print("\ao[ERROR]\ax ExecuteZoneCommand for EQBC requires netbots to be loaded.")
+      printText("\ao[ERROR]\ax ExecuteZoneCommand for EQBC requires netbots to be loaded.")
     end
   end,
   ExecuteZoneWithSelfCommand = function(executeCommand)
     if netbotsLoaded then
       mq.cmdf('/noparse /bcza /%s', executeCommand)
     else
-      print("\ao[ERROR]\ax ExecuteZoneCommand for EQBC requires netbots to be loaded.")
+      printText("\ao[ERROR]\ax ExecuteZoneCommand for EQBC requires netbots to be loaded.")
     end
   end,
   ExecuteGroupCommand= function(executeCommand)
@@ -206,7 +217,7 @@ local function handler(message)
     connectedClients[message.content.from] = mq.gettime()
   elseif message.content.type == 'Echo' then
     if not message.content.zoneId or message.content.zoneId == mq.TLO.Zone.ID() then
-      print(message.content.content)
+      printText(message.content.content)
     end
   elseif message.content.type == 'ExecuteCommand' then
       if not message.content.zoneId or message.content.zoneId == mq.TLO.Zone.ID() then
@@ -315,28 +326,28 @@ actor:send({ type= 'Announce' })
 local noBroadcaster = {
   ColorCodes= {},
   Broadcast= function(message, recievers)
-    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> or <ACTOR> connection.")
+    printText("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> or <ACTOR> connection.")
   end,
   ExecuteCommand= function(executeCommand, recievers)
-    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> or <ACTOR> connection.")
+    printText("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> or <ACTOR> connection.")
   end,
   ExecuteAllCommand= function(executeCommand) 
-    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> or <ACTOR> connection.")
+    printText("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> or <ACTOR> connection.")
   end,
   ExecuteAllWithSelfCommand= function(executeCommand) 
-    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> or <ACTOR> connection.")
+    printText("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> or <ACTOR> connection.")
   end,
   ExecuteZoneCommand= function(executeCommand)
-    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> or <ACTOR> connection.")
+    printText("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> or <ACTOR> connection.")
   end,
   ExecuteZoneWithSelfCommand= function(executeCommand)
-    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> or <ACTOR> connection.")
+    printText("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> or <ACTOR> connection.")
   end,
   ExecuteGroupCommand= function(executeCommand)
-    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> or <ACTOR> connection.")
+    printText("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> or <ACTOR> connection.")
   end,
   ExecuteGroupWithSelfCommand= function(executeCommand)
-    print("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> or <ACTOR> connection.")
+    printText("Not been able to load <BroadCastInterface>. Requires <DanNet> or <EQBC> or <ACTOR> connection.")
   end,
   ConnectedClients= function()
     return {}
@@ -347,8 +358,10 @@ local noBroadcaster = {
 }
 
 ---@param mode BroadCastMode
+---@param consoleWidget ConsoleWidget|nil
 ---@return BroadCastInterface
-local function factory(mode)
+local function factory(mode, consoleWidget)
+  console = consoleWidget
   if (mode == 'DANNET' or mode == 'AUTO') and mq.TLO.Plugin("mq2dannet").IsLoaded() then
     return dannetBroadCaster
   elseif (mode == 'EQBC' or mode == 'AUTO') and mq.TLO.Plugin("mq2eqbc").IsLoaded() then

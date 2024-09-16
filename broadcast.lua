@@ -103,10 +103,11 @@ function BroadCast.ColorWrap(text, color)
 end
 
 ---@param mode BroadCastMode
-function BroadCast.SetMode(mode)
+---@param consoleWidget ConsoleWidget|nil
+function BroadCast.SetMode(mode, consoleWidget)
   local logstring = string.format("[%s] %s", os.date('%H:%M:%S'), mode)
   print(logstring)
-  broadCastInterface = broadCastInterfaceFactory(mode)
+  broadCastInterface = broadCastInterfaceFactory(mode, consoleWidget)
 end
 
 return BroadCast
