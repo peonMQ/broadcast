@@ -43,7 +43,7 @@ end
 
 local function log(text)
   local logtext = string.format("[%s] %s", os.date('%H:%M:%S'), text)
-  printText(log)
+  printText(logtext)
 end
 
 ---@type BroadCastInterface
