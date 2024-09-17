@@ -361,7 +361,10 @@ local noBroadcaster = {
 ---@param consoleWidget ConsoleWidget|nil
 ---@return BroadCastInterface
 local function factory(mode, consoleWidget)
-  console = consoleWidget
+  if consoleWidget then
+    console = consoleWidget
+  end
+
   if (mode == 'DANNET' or mode == 'AUTO') and mq.TLO.Plugin("mq2dannet").IsLoaded() then
     return dannetBroadCaster
   elseif (mode == 'EQBC' or mode == 'AUTO') and mq.TLO.Plugin("mq2eqbc").IsLoaded() then
