@@ -17,8 +17,13 @@ local initial_broadcastLevels = {
 }
 
 BroadCast.usetimestamp = false
+-- Specifies the current log level.  Log levels lower than this will not be shown.
 BroadCast.broadcastLevel = 'info'
+-- Sets a prefix for log messages.  This appears at the very beginning of the line and can be a string or a function that returns a string
 BroadCast.prefix = ''
+-- Sets a postfix for log messages.  This appears at the end of the write string, prior to the separator
+BroadCast.postfix = ''
+-- Sets a separator that is placed between the write string and the log entry to be printed
 BroadCast.separator = '::'
 
 local broadCastInterface = broadCastInterfaceFactory('AUTO')
@@ -63,7 +68,8 @@ local function Output(broadcastLevel, recievers, message, ...)
     recievers = (type(recievers) == 'string') and {recievers} or recievers    
     local logMessage = string.format(message, ...)
     local prefix = (type(BroadCast.prefix) == 'function' and BroadCast.prefix() or BroadCast.prefix) or ''
-    broadCastInterface.Broadcast(string.format('%s%s %s %s', prefix, GetAbbreviation(broadCastInterface, BroadCast.broadcastlevels[broadcastLevel]), BroadCast.separator, logMessage), recievers)
+    local postfix = (type(BroadCast.postfix) == 'function' and BroadCast.postfix() or BroadCast.postfix) or ''
+    broadCastInterface.Broadcast(string.format('%s%s %s%s %s', prefix, GetAbbreviation(broadCastInterface, BroadCast.broadcastlevels[broadcastLevel]), postfix, BroadCast.separator, logMessage), recievers)
   end
 end
 
