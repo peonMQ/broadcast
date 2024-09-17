@@ -105,8 +105,6 @@ end
 ---@param mode BroadCastMode
 ---@param consoleWidget ConsoleWidget|nil
 function BroadCast.SetMode(mode, consoleWidget)
-  local logstring = string.format("[%s] %s", os.date('%H:%M:%S'), mode)
-  print(logstring)
   broadCastInterface = broadCastInterfaceFactory(mode, consoleWidget)
 end
 
