@@ -14,7 +14,7 @@ local actors = require('actors')
 ---@field ExecuteZoneCommand fun(executeCommand: string)
 ---@field ExecuteZoneWithSelfCommand fun(executeCommand: string)
 ---@field ConnectedClients fun(): string[]
----@field ColorWrap fun(self: BroadCastInterface, text: string, color: ColorName): string
+---@field ColorWrap fun(self: BroadCastInterface, text: string|number, color: ColorName): string
 ---@field ColorCodes table<ColorName, string>
 
 ---@type ConsoleWidget|nil
@@ -353,7 +353,7 @@ local noBroadcaster = {
     return {}
   end,
   ColorWrap = function(self, text, color)
-    return text
+    return string.format('%s',text);
   end,
 }
 

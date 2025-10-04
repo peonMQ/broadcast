@@ -101,7 +101,7 @@ end
 
 BroadCast.GenerateShortcuts()
 
----@param text string
+---@param text string|number
 ---@param color ColorName
 ---@return string
 function BroadCast.ColorWrap(text, color)
