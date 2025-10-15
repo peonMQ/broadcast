@@ -9,11 +9,13 @@ local BroadCast = { _version = '2.0', _author = 'projecteon' }
 
 ---@type table<string, BroadCastLevelDetail>
 local initial_broadcastLevels = {
-  ['info']    = { level = 1, color = 'Blue',   abbreviation = '[INFO%s]'    },
-  ['success'] = { level = 2, color = 'Green',  abbreviation = '[SUCCESS%s]' },
-  ['fail']    = { level = 3, color = 'Red',    abbreviation = '[FAIL%s]'    },
-  ['warn']    = { level = 4, color = 'Yellow', abbreviation = '[WARN%s]'    },
-  ['error']   = { level = 5, color = 'Orange', abbreviation = '[ERROR%s]'   },
+  ['debug']    = { level = 1, color = 'Cyan',   abbreviation = '[DEBUG%s]'    },
+  ['info']     = { level = 2, color = 'Blue',   abbreviation = '[INFO%s]'     },
+  ['success']  = { level = 3, color = 'Green',  abbreviation = '[SUCCESS%s]'  },
+  ['fail']     = { level = 4, color = 'Red',    abbreviation = '[FAIL%s]'     },
+  ['warn']     = { level = 5, color = 'Yellow', abbreviation = '[WARN%s]'     },
+  ['error']    = { level = 6, color = 'Orange', abbreviation = '[ERROR%s]'    },
+  ['critical'] = { level = 7, color = 'Maroon', abbreviation = '[CRITICAL%s]' },
 }
 
 BroadCast.usetimestamp = false
