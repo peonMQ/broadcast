@@ -364,13 +364,13 @@ local function factory(mode, consoleWidget)
   if consoleWidget then
     console = consoleWidget
   end
-
-  if (mode == 'DANNET' or mode == 'AUTO') and mq.TLO.Plugin("mq2dannet").IsLoaded() then
-    return dannetBroadCaster
-  elseif (mode == 'EQBC' or mode == 'AUTO') and mq.TLO.Plugin("mq2eqbc").IsLoaded() then
-    return eqbcBroadCaster
-  elseif (mode == 'ACTOR' or mode == 'AUTO') then
+  
+  if (mode == 'ACTOR' or mode == 'AUTO' or not mode) then
     return actorBroadcaster
+  elseif (mode == 'DANNET') and mq.TLO.Plugin("mq2dannet").IsLoaded() then
+    return dannetBroadCaster
+  elseif (mode == 'EQBC') and mq.TLO.Plugin("mq2eqbc").IsLoaded() then
+    return eqbcBroadCaster
   end
 
   return noBroadcaster
