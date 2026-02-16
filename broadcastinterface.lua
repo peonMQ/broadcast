@@ -1,7 +1,7 @@
 local mq = require 'mq'
 local actors = require('actors')
 
----@alias BroadCastMode 'EQBC'|'DANNET'|'ACTOR'|'AUTO'
+---@alias BroadCastMode 'EQBC'|'DANNET'|'ACTOR'|'REMOTE'|'AUTO'
 ---@alias ColorName 'Previous'|'Black'|'Blue'|'Cyan'|'Green'|'Maroon'|'Orange'|'Red'|'White'|'Yellow'
 
 ---@class BroadCastInterface
