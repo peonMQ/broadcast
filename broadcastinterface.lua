@@ -204,6 +204,62 @@ local eqbcBroadCaster = {
   end
 }
 
+---@type BroadCastInterface
+local remoteBroadCaster = {
+  ColorCodes = {
+    Previous = '\ax',
+    Black = '\ab',
+    Blue = '\au',
+    Cyan = '\at',
+    Green = '\ag',
+    Maroon = '\am',
+    Orange = '\ao',
+    Purple = '\ap',
+    Red = '\ar',
+    White = '\aw',
+    Yellow = '\ay',
+  },
+  Broadcast = function(message, recievers)
+    if recievers and next(recievers) then
+      for _, client in ipairs(recievers) do
+        mq.cmdf("/rc server %s /echo %s", client, message)
+      end
+    else
+      mq.cmdf('/rc +self server /echo %s', message)
+    end
+  end,
+  ExecuteCommand = function(executeCommand, recievers)
+    for i, client in ipairs(recievers) do
+      mq.cmdf("/noparse /rc server %s %s", client, executeCommand)
+    end
+  end,
+  ExecuteAllCommand = function(executeCommand)
+    mq.cmdf('/noparse /rc server %s', executeCommand)
+  end,
+  ExecuteAllWithSelfCommand = function(executeCommand)
+    mq.cmdf('/noparse /rc +self server %s', executeCommand)
+  end,
+  ExecuteZoneCommand = function(executeCommand)
+    mq.cmdf('/noparse /rc zone %s', executeCommand)
+  end,
+  ExecuteZoneWithSelfCommand = function(executeCommand)
+    mq.cmdf('/noparse /rc +self zone %s', executeCommand)
+  end,
+  ExecuteGroupCommand= function(executeCommand)
+    mq.cmdf('/noparse /rc group %s', executeCommand)
+  end,
+  ExecuteGroupWithSelfCommand= function(executeCommand)
+    mq.cmdf('/noparse /rc +self group %s', executeCommand)
+  end,
+  ConnectedClients = function ()
+    local clients={}
+    return clients
+  end,
+  ColorWrap = function (self, text, color)
+    return string.format('%s%s%s', self.ColorCodes[color], text, self.ColorCodes.Previous)
+  end
+}
+
 ---@alias MessageType 'ExecuteCommand'|'Echo'|'Registrer'|'Announce'
 local connectedClients = {}
 ---@param message Message
@@ -319,7 +375,6 @@ local actorBroadcaster = {
   end
 }
 
-
 actor:send({ type= 'Announce' })
 
 ---@type BroadCastInterface
@@ -365,7 +420,9 @@ local function factory(mode, consoleWidget)
     console = consoleWidget
   end
   
-  if (mode == 'ACTOR' or mode == 'AUTO' or not mode) then
+  if (mode == 'REMOTE' or mode == 'AUTO' or not mode) and mq.TLO.Plugin("mqremote").IsLoaded() then
+    return remoteBroadCaster
+  elseif (mode == 'ACTOR' or mode == 'AUTO' or not mode) then
     return actorBroadcaster
   elseif (mode == 'DANNET') and mq.TLO.Plugin("mq2dannet").IsLoaded() then
     return dannetBroadCaster

@@ -28,7 +28,7 @@ BroadCast.postfix = ''
 -- Sets a separator that is placed between the write string and the log entry to be printed
 BroadCast.separator = '::'
 
-local broadCastInterface = broadCastInterfaceFactory('AUTO')
+local broadCastInterface = broadCastInterfaceFactory('ACTOR')
 
 
 -- Handle add/remove for log levels
