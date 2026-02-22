@@ -422,12 +422,12 @@ local function factory(mode, consoleWidget)
   
   if (mode == 'REMOTE' or mode == 'AUTO' or not mode) and mq.TLO.Plugin("mqremote").IsLoaded() then
     return remoteBroadCaster
+  elseif (mode == 'DANNET' or mode == 'AUTO') and mq.TLO.Plugin("mq2dannet").IsLoaded() then
+    return dannetBroadCaster
+  elseif (mode == 'EQBC' or mode == 'AUTO') and mq.TLO.Plugin("mq2eqbc").IsLoaded() then
+    return eqbcBroadCaster
   elseif (mode == 'ACTOR' or mode == 'AUTO' or not mode) then
     return actorBroadcaster
-  elseif (mode == 'DANNET') and mq.TLO.Plugin("mq2dannet").IsLoaded() then
-    return dannetBroadCaster
-  elseif (mode == 'EQBC') and mq.TLO.Plugin("mq2eqbc").IsLoaded() then
-    return eqbcBroadCaster
   end
 
   return noBroadcaster
